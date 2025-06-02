@@ -1,17 +1,31 @@
-// lib/prisma.ts
+// lib/prisma.ts (Exemplo mais robusto para Next.js/Serverless)
 import { PrismaClient } from '@prisma/client';
 
-let prisma: PrismaClient;
+let prisma: PrismaClient | undefined;
 
-if (process.env.NODE_ENV === 'production') {
-  prisma = new PrismaClient();
-} else {
-  // Em desenvolvimento, evite criar múltiplas instâncias do PrismaClient
-  // devido ao hot reloading do Next.js.
-  if (!global.prisma) {
-    global.prisma = new PrismaClient();
+function getPrismaClient() {
+  if (!prisma) {
+    prisma = new PrismaClient();
   }
-  prisma = global.prisma;
+  return prisma;
 }
 
-export default prisma;
+// Exporta uma instância da função, em vez de uma instância global direta
+export default getPrismaClient();
+
+// Ou, se quiseres ser mais explícito em como gerir a vida útil da conexão:
+
+// lib/prisma.ts (Opção 2: Desconectar e reconectar explicitamente, menos comum para Next.js por padrão)
+// import { PrismaClient } from '@prisma/client';
+
+// const prisma = new PrismaClient();
+
+// export default prisma;
+
+// E depois na tua API route:
+// try {
+//   // ... teu código ...
+// } finally {
+//   // Desconecta o Prisma APÓS cada requisição para garantir uma nova sessão
+//   await prisma.$disconnect();
+// }

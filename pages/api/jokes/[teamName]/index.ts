@@ -1,6 +1,6 @@
 // pages/api/jokes/[teamName]/index.ts
 import type { NextApiRequest, NextApiResponse } from 'next';
-import prisma from '@/lib/prisma'; // Ajuste o caminho se necessário
+import prisma from '@/lib/prisma'; 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   const { teamName } = req.query;

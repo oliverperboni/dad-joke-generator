@@ -51,7 +51,7 @@ export default function DadJokeGenerator() {
       setDisplayedJoke("")
       // setShowJoke(true) // Já tratado no loadInitialJokes e fetchDadJoke
 
-      let i = -1
+      let i = -1// Índice do caractere atual
       let typewriterInterval: NodeJS.Timeout
       const timer = setTimeout(() => {
         typewriterInterval = setInterval(() => {
@@ -199,7 +199,7 @@ export default function DadJokeGenerator() {
             {showYesterdayJokeDisplay && yesterdayJoke && (
               <div className="mt-6 pt-4 border-t border-purple-200 animate-fadeIn">
                 <h3 className="text-lg font-semibold text-purple-700 mb-3 text-center">
-                  Ah, Yesterday's Gem...
+                  Ah, Yesterday's Joke...
                 </h3>
                 <div className="bg-purple-50 p-4 rounded-lg border border-purple-200 text-center shadow-inner">
                   <p className="text-purple-800 italic leading-relaxed">
@@ -220,7 +220,7 @@ export default function DadJokeGenerator() {
                   <span className="mr-2">Drumroll please...</span>
                 </span>
               ) : (
-                "Get Today's Chuckle"
+                "Get Today's Joke "
               )}
             </Button>
             {yesterdayJoke && (
@@ -231,7 +231,7 @@ export default function DadJokeGenerator() {
                 disabled={isLoadingInitial}
               >
                 <MessageSquareText className="mr-2 h-4 w-4" />
-                {showYesterdayJokeDisplay ? "Hide Yesterday's Gem" : "Recall Yesterday's Gem"}
+                {showYesterdayJokeDisplay ? "Hide Yesterday's Joke" : "Recall Yesterday's Joke"}
               </Button>
             )}
           </CardFooter>

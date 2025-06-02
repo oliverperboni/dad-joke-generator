@@ -29,7 +29,7 @@ export default function DadJokeGenerator() {
           throw new Error(`Failed to fetch initial jokes: ${response.statusText}`);
         }
         const data = await response.json();
-        setJoke(data.currentJoke || ""); // Se nulo, string vazia para não quebrar typewriter
+        setJoke(""); // Se nulo, string vazia para não quebrar typewriter
         setYesterdayJoke(data.yesterdayJoke);
         if (data.currentJoke) {
           setShowJoke(true); // Ativa typewriter se houver piada atual

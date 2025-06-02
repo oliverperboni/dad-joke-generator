@@ -25,13 +25,13 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       // 2. Encontrar o time ou criar se não existir (upsert)
       const team = await prisma.team.upsert({
         where: { name: teamName },
-        update: {}, // Não precisa de update específico aqui, faremos em seguida
+        update: {}, 
         create: { name: teamName },
       });
 
       // 3. Atualizar as piadas do time
       const updatedTeam = await prisma.team.update({
-        where: { id: team.id },
+        where: { name: teamName },
         data: {
           yesterdayJokeText: team.currentJokeText, // A antiga piada atual vira a de ontem
           currentJokeText: newExternalJoke,       // A nova piada externa é a atual
@@ -40,9 +40,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
       res.status(200).json({
         currentJoke: updatedTeam.currentJokeText,
-        // Opcionalmente, você pode retornar a yesterdayJokeText também,
-        // mas o frontend já deve ter a antiga "current" que se tornou "yesterday".
-        // Para consistência, vamos retornar:
         yesterdayJoke: updatedTeam.yesterdayJokeText
       });
 

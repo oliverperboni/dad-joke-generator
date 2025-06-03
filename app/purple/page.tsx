@@ -47,11 +47,11 @@ export default function DadJokeGenerator() {
 
   // Efeito Typewriter para a piada atual
   useEffect(() => {
-    if (joke && !isLoading && !isLoadingInitial) { // Não rodar typewriter durante o loading inicial ou de nova piada
+    if (joke && !isLoading) {
       setDisplayedJoke("")
-      // setShowJoke(true) // Já tratado no loadInitialJokes e fetchDadJoke
-
-      let i = -1// Índice do caractere atual
+      setShowJoke(true)
+  
+      let i = -1
       let typewriterInterval: NodeJS.Timeout
       const timer = setTimeout(() => {
         typewriterInterval = setInterval(() => {
@@ -63,16 +63,13 @@ export default function DadJokeGenerator() {
           }
         }, 50)
       }, 500)
+  
       return () => {
         clearTimeout(timer)
         clearInterval(typewriterInterval)
       }
-    } else if (!joke && !isLoading && !isLoadingInitial) {
-      // Limpa a piada exibida se não houver piada (ex: após erro ou time novo)
-      setDisplayedJoke("");
-      setShowJoke(false);
     }
-  }, [joke, isLoading, isLoadingInitial]) // Depende de joke e isLoading
+  }, [joke, isLoading]) // Depende de joke e isLoading
 
   // Animação da barra de progresso
   useEffect(() => {

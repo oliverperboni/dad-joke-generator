@@ -6,14 +6,12 @@ import { Button } from "@/components/ui/button"
 import { Loader2, MessageSquareText } from "lucide-react"
 import { Progress } from "@/components/ui/progress"
 
-// Removida a constante YESTERDAY_JOKE_LS_KEY pois não usaremos mais localStorage
-
-
 export default function DadJokeGenerator() {
   const [joke, setJoke] = useState<string | null>(null) // Piada atual
   const [yesterdayJoke, setYesterdayJoke] = useState<string | null>(null) // Piada de ontem
   const [isLoading, setIsLoading] = useState(false) // Para buscar nova piada
-  const [isLoadingInitial, setIsLoadingInitial] = useState(true); // Para o carregamento inicial
+  const [isLoadingInitial, setIsLoadingInitial] = useState(true) // Para o carregamento inicial
+  const [hasInitialJoke, setHasInitialJoke] = useState(false) // Se já temos uma piada carregada
   const [progress, setProgress] = useState(0)
   const [displayedJoke, setDisplayedJoke] = useState("")
   const [showJoke, setShowJoke] = useState(false)
@@ -22,54 +20,60 @@ export default function DadJokeGenerator() {
   // Carregar piadas iniciais do time ao montar o componente
   useEffect(() => {
     const loadInitialJokes = async () => {
-      setIsLoadingInitial(true);
+      setIsLoadingInitial(true)
       try {
-        const response = await fetch(`/api/jokes/purple`);
+        const response = await fetch(`/api/jokes/purple`)
         if (!response.ok) {
-          throw new Error(`Failed to fetch initial jokes: ${response.statusText}`);
+          throw new Error(`Failed to fetch initial jokes: ${response.statusText}`)
         }
-        const data = await response.json();
-        setJoke(""); // Se nulo, string vazia para não quebrar typewriter
-        setYesterdayJoke(data.yesterdayJoke);
+        const data = await response.json()
+        
+        // Armazena as piadas mas NÃO as mostra ainda
         if (data.currentJoke) {
-          setShowJoke(true); // Ativa typewriter se houver piada atual
+          setJoke(data.currentJoke)
+          setHasInitialJoke(true)
         }
+        setYesterdayJoke(data.yesterdayJoke)
+        
       } catch (error) {
-        console.error("Error loading initial jokes:", error);
-        setJoke("Oops! Couldn't load today's joke.");
-        setYesterdayJoke("Could not load yesterday's joke either.");
+        console.error("Error loading initial jokes:", error)
+        setJoke("Oops! Couldn't load today's joke.")
+        setYesterdayJoke("Could not load yesterday's joke either.")
+        setHasInitialJoke(true)
       } finally {
-        setIsLoadingInitial(false);
-      }
-    };
-    loadInitialJokes();
-  }, []); // Recarregar se o teamName mudar
-
-  // Efeito Typewriter para a piada atual
-  useEffect(() => {
-    if (joke && !isLoading) {
-      setDisplayedJoke("")
-      setShowJoke(true)
-  
-      let i = -1
-      let typewriterInterval: NodeJS.Timeout
-      const timer = setTimeout(() => {
-        typewriterInterval = setInterval(() => {
-          if (i < joke.length) {
-            setDisplayedJoke((prev) => prev + joke.charAt(i))
-            i++
-          } else {
-            clearInterval(typewriterInterval)
-          }
-        }, 50)
-      }, 500)
-  
-      return () => {
-        clearTimeout(timer)
-        clearInterval(typewriterInterval)
+        setIsLoadingInitial(false)
       }
     }
-  }, [joke, isLoading]) // Depende de joke e isLoading
+    loadInitialJokes()
+  }, [])
+
+  // Efeito Typewriter para a piada atual
+ useEffect(() => {
+  if (joke && showJoke && !isLoading) {
+    setDisplayedJoke("")
+    const currentJoke = joke // Captura o valor no início
+    
+    let i = 0
+    let typewriterInterval: NodeJS.Timeout
+    setDisplayedJoke(currentJoke.charAt(i)) // Limpa a piada exibida antes de começar a digitar
+    const timer = setTimeout(() => {
+      typewriterInterval = setInterval(() => {
+        if (i < currentJoke.length) {
+          console.log(`Typing character ${i + 1}: ${currentJoke.charAt(i)}`)
+          setDisplayedJoke((prev) => prev + currentJoke.charAt(i))
+          i++
+        } else {
+          clearInterval(typewriterInterval)
+        }
+      }, 50)
+    }, 500)
+    
+    return () => {
+      clearTimeout(timer)
+      clearInterval(typewriterInterval)
+    }
+  }
+}, [joke, showJoke, isLoading])
 
   // Animação da barra de progresso
   useEffect(() => {
@@ -88,45 +92,54 @@ export default function DadJokeGenerator() {
     }
   }, [isLoading])
 
+  const showTodaysJoke = () => {
+    if (hasInitialJoke && joke && !showJoke) {
+      // Se já temos uma piada carregada, apenas mostra ela
+      setShowJoke(true)
+    } else {
+      // Senão, busca uma nova piada
+      fetchDadJoke()
+    }
+  }
+
   const fetchDadJoke = async () => {
-  
     setIsLoading(true)
-    setShowJoke(false) // Esconde a piada atual enquanto uma nova é carregada
+    setShowJoke(false)
 
     // A piada que está em 'joke' (estado atual) se tornará a 'yesterdayJoke' visualmente
-    // A API no backend já fará essa lógica no DB
-    const currentJokeBecomesYesterday = joke;
+    const currentJokeBecomesYesterday = joke
 
     try {
-      // Artificial delay - pode ser removido se a API já for "lenta"
-      // await new Promise((resolve) => setTimeout(resolve, 1000)); // Reduzido para 1s
-
       const response = await fetch(`/api/jokes/purple/new`, {
         method: 'POST',
-      });
+      })
 
       if (!response.ok) {
-        const errorData = await response.json().catch(() => ({ error: "Failed to fetch new joke and parse error" }));
-        throw new Error(errorData.error || `Failed to fetch new joke: ${response.statusText}`);
+        const errorData = await response.json().catch(() => ({ error: "Failed to fetch new joke and parse error" }))
+        throw new Error(errorData.error || `Failed to fetch new joke: ${response.statusText}`)
       }
 
-      const data = await response.json();
-      setYesterdayJoke(currentJokeBecomesYesterday); // Atualiza yesterdayJoke no frontend
-      setJoke(data.currentJoke);
-      setShowJoke(true); // Mostra a nova piada (ativará o typewriter)
+      const data = await response.json()
+
+      console.log(data)
+      setYesterdayJoke(currentJokeBecomesYesterday)
+      setJoke(data.currentJoke)
+      setHasInitialJoke(true)
+      setShowJoke(true)
 
     } catch (error) {
-      console.error("Error fetching new dad joke:", error);
-      setJoke(`Oops! ${error.message || "Couldn't fetch a new joke."}`);
-      // Mantém a yesterdayJoke anterior
+      console.error("Error fetching new dad joke:", error)
+      setJoke(`Oops! ${error.message || "Couldn't fetch a new joke."}`)
+      setHasInitialJoke(true)
+      setShowJoke(true)
     } finally {
       setIsLoading(false)
     }
   }
 
   const toggleYesterdayJokeDisplay = () => {
-    setShowYesterdayJokeDisplay((prev) => !prev);
-  };
+    setShowYesterdayJokeDisplay((prev) => !prev)
+  }
 
   if (isLoadingInitial) {
     return (
@@ -136,7 +149,7 @@ export default function DadJokeGenerator() {
           <p className="text-purple-700 mt-4 text-lg">Loading jokes for Team Purple...</p>
         </div>
       </div>
-    );
+    )
   }
 
   return (
@@ -153,9 +166,8 @@ export default function DadJokeGenerator() {
             <div className="text-center">
               <h2 className="text-xl font-semibold mb-4 text-purple-800">Good morning team!</h2>
               <div className="bg-purple-50 p-6 rounded-lg border border-purple-200 min-h-32 flex flex-col items-center justify-center relative overflow-hidden">
-                {isLoading ? ( // Loading para nova piada
+                {isLoading ? (
                   <div className="space-y-4 w-full">
-                    {/* ... UI de loading com barra de progresso ... */}
                     <div className="flex justify-center items-center mb-2">
                       <div className="relative">
                         <Loader2 className="h-10 w-10 text-purple-600 animate-spin" />
@@ -182,13 +194,16 @@ export default function DadJokeGenerator() {
                       )}
                     </p>
                     {/* Animação de 'ping' quando a piada termina de ser digitada */}
-                    {displayedJoke.length === joke.length && joke.length > 0 &&(
+                    {displayedJoke.length === joke.length && joke.length > 0 && (
                       <div className="absolute -bottom-6 -right-6 h-12 w-12 bg-purple-100 rounded-full opacity-20 animate-ping"></div>
                     )}
                   </div>
                 ) : (
                   <p className="text-purple-500 italic">
-                    {joke ? joke : "Click the button below to get a dad joke!"}
+                    {hasInitialJoke 
+                      ? "Your dad joke is ready! Click the button below to reveal it." 
+                      : "Click the button below to get a dad joke!"
+                    }
                   </p>
                 )}
               </div>
@@ -208,7 +223,7 @@ export default function DadJokeGenerator() {
           </CardContent>
           <CardFooter className="flex flex-col sm:flex-row justify-center items-center pb-6 pt-4 space-y-3 sm:space-y-0 sm:space-x-3">
             <Button
-              onClick={fetchDadJoke}
+              onClick={showTodaysJoke}
               className="bg-gradient-to-r from-purple-600 to-purple-700 hover:from-purple-700 hover:to-purple-800 text-white px-5 py-2.5 rounded-full shadow-md hover:shadow-lg transform transition-all hover:-translate-y-1 active:translate-y-0 disabled:opacity-70 disabled:hover:translate-y-0 w-full sm:w-auto text-sm"
               disabled={isLoading || isLoadingInitial}
             >
@@ -216,8 +231,12 @@ export default function DadJokeGenerator() {
                 <span className="flex items-center justify-center">
                   <span className="mr-2">Drumroll please...</span>
                 </span>
+              ) : showJoke ? (
+                "Get New Joke"
+              ) : hasInitialJoke ? (
+                "Reveal Today's Joke"
               ) : (
-                "Get Today's Joke "
+                "Get Today's Joke"
               )}
             </Button>
             {yesterdayJoke && (

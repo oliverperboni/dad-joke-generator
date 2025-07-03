@@ -28,7 +28,6 @@ export default function DadJokeGenerator() {
         }
         const data = await response.json()
 
-        console.log(data)
         
         // Armazena as piadas mas NÃO as mostra ainda
         if (data.currentJoke) {
@@ -116,7 +115,6 @@ export default function DadJokeGenerator() {
 
       const data = await response.json()
 
-      console.log(data)
       setYesterdayJoke(currentJokeBecomesYesterday)
       setJoke(data.currentJoke)
       setHasInitialJoke(true)

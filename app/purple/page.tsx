@@ -27,13 +27,15 @@ export default function DadJokeGenerator() {
           throw new Error(`Failed to fetch initial jokes: ${response.statusText}`)
         }
         const data = await response.json()
+
+        console.log(data)
         
         // Armazena as piadas mas NÃO as mostra ainda
         if (data.currentJoke) {
           setJoke(data.currentJoke)
           setHasInitialJoke(true)
         }
-        setYesterdayJoke(data.yesterdayJoke)
+        setYesterdayJoke(data.currentJoke)
         
       } catch (error) {
         console.error("Error loading initial jokes:", error)
@@ -59,7 +61,6 @@ export default function DadJokeGenerator() {
     const timer = setTimeout(() => {
       typewriterInterval = setInterval(() => {
         if (i < currentJoke.length) {
-          console.log(`Typing character ${i + 1}: ${currentJoke.charAt(i)}`)
           setDisplayedJoke((prev) => prev + currentJoke.charAt(i))
           i++
         } else {
@@ -93,13 +94,7 @@ export default function DadJokeGenerator() {
   }, [isLoading])
 
   const showTodaysJoke = () => {
-    if (hasInitialJoke && joke && !showJoke) {
-      // Se já temos uma piada carregada, apenas mostra ela
-      setShowJoke(true)
-    } else {
-      // Senão, busca uma nova piada
       fetchDadJoke()
-    }
   }
 
   const fetchDadJoke = async () => {

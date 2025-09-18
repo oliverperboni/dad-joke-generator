@@ -28,6 +28,8 @@ export default function DadJokeGenerator() {
   // new states for explanation
   const [explanation, setExplanation] = useState<string | null>(null);
   const [isExplaining, setIsExplaining] = useState(false);
+  const [displayedExplanation, setDisplayedExplanation] = useState("");
+  const [showExplanation, setShowExplanation] = useState(false);
 
   useEffect(() => {
     const loadInitialJokes = async () => {
@@ -80,6 +82,34 @@ export default function DadJokeGenerator() {
       };
     }
   }, [joke, showJoke, isLoading]);
+
+  useEffect(() => {
+    if (explanation) {
+      setDisplayedExplanation("");
+      setShowExplanation(true);
+      const currentExplanation = explanation;
+      let i = 0;
+      let typewriterInterval: NodeJS.Timeout;
+      setDisplayedExplanation(currentExplanation.charAt(i));
+      const timer = setTimeout(() => {
+        typewriterInterval = setInterval(() => {
+          if (i < currentExplanation.length) {
+            setDisplayedExplanation(
+              (prev) => prev + currentExplanation.charAt(i)
+            );
+            i++;
+          } else {
+            clearInterval(typewriterInterval);
+          }
+        }, 40); // velocidade do typing
+      }, 300); // delay antes de começar
+
+      return () => {
+        clearTimeout(timer);
+        clearInterval(typewriterInterval);
+      };
+    }
+  }, [explanation]);
 
   useEffect(() => {
     if (isLoading) {
@@ -237,7 +267,11 @@ export default function DadJokeGenerator() {
                 </h3>
                 <div className="bg-yellow-50 p-4 rounded-lg border border-yellow-200 text-center shadow-inner">
                   <p className="text-yellow-800 leading-relaxed">
-                    {explanation}
+                    {displayedExplanation}
+                    {displayedExplanation.length <
+                      (explanation?.length || 0) && (
+                      <span className="animate-pulse inline-block ml-0.5 w-2 h-4 bg-yellow-400"></span>
+                    )}
                   </p>
                 </div>
               </div>

@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,10 +9,10 @@ datasource db {
 }
 
 model Team {
-  id        Int     @id @default(autoincrement())
-  name              String    @unique // Identificador do time, ex: "marketing", "sales"
-  currentJokeText   String?   // Texto da piada atual
-  yesterdayJokeText String?   // Texto da piada de ontem
-  updatedAt         DateTime  @updatedAt // Para saber quando a piada foi atualizada
-  createdAt         DateTime  @default(now())
+  id                Int      @id @default(autoincrement())
+  name              String   @unique
+  currentJokeText   String?
+  yesterdayJokeText String?
+  updatedAt         DateTime @updatedAt
+  createdAt         DateTime @default(now())
 }

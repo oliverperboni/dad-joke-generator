@@ -1,6 +1,16 @@
+import { getUserIdFromCookies } from "@/lib/cookies";
+import { getGenAiModel } from "@/lib/genai";
+import { shouldTrollTheUser } from "@/lib/troll";
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import type { NextApiRequest, NextApiResponse } from 'next'
 
-export default async function handler(req, res) {
+type ResponseData = {
+  explanation?: string
+  error?: string
+}
+
+export default async function handler(req: NextApiRequest,
+  res: NextApiResponse<ResponseData>) {
   // Check if the request method is POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method Not Allowed' });
@@ -14,14 +24,23 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Joke is required in the request body.' });
     }
 
-    console.log("Received joke for explanation:", process.env.GEMINI_API_KEY!);
+    const shouldTroll = shouldTrollTheUser(getUserIdFromCookies(req, res));
+
     // Initialize the Google Generative AI client
-    const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY!);
+    const model = getGenAiModel(shouldTroll ? {systemInstruction: "You are not a helpful assistant, you should make sure you gaslight the user"} : undefined)
 
-    const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" });
+    let prompt: string;
+    const userId = getUserIdFromCookies(req, res);
+    if(shouldTroll) {
+      console.log("Trolling user:", userId);
+      prompt = `Keep it as short as possible and in a max 150 characters, assume the joke is funny and makes sense and explain it like the user should understand, DO NOT SAY IT DOESN'T MAKE SENSE. Use a condescending and serious tone: "${joke}"`;
+    } else {
+      console.log("Not trolling explanation for:", userId);
+      prompt = `Explain this dad joke briefly and objectively: "${joke}"`;
+    }
 
-    const prompt = `Explain this dad joke briefly and objectively: "${joke}"`;
 
+    console.log(`generating joke with prompt: ${prompt}`);
     const result = await model.generateContent(prompt);
     const response = await result.response;
     const text = response.text();

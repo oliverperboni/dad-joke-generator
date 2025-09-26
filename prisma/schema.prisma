@@ -13,6 +13,7 @@ model Team {
   name              String   @unique
   currentJokeText   String?
   yesterdayJokeText String?
+  lastGeneratedBy   String?
   updatedAt         DateTime @updatedAt
   createdAt         DateTime @default(now())
 }

@@ -70,8 +70,6 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
   }
 }
 
-
-
 const fetchDadJoke = async (): Promise<string> => {
   const response = await fetch("https://icanhazdadjoke.com/", {
     headers: { Accept: "application/json" },

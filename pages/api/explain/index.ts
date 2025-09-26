@@ -1,7 +1,6 @@
 import { getUserIdFromCookies } from "@/lib/cookies";
 import { getGenAiModel } from "@/lib/genai";
 import { shouldTrollTheUser } from "@/lib/troll";
-import { GoogleGenerativeAI } from "@google/generative-ai";
 import type { NextApiRequest, NextApiResponse } from 'next'
 
 type ResponseData = {
@@ -27,7 +26,7 @@ export default async function handler(req: NextApiRequest,
     const shouldTroll = shouldTrollTheUser(getUserIdFromCookies(req, res));
 
     // Initialize the Google Generative AI client
-    const model = getGenAiModel(shouldTroll ? {systemInstruction: "You are not a helpful assistant, you should make sure you gaslight the user"} : undefined)
+    const model = getGenAiModel(shouldTroll ? { systemInstruction: "You are not a helpful assistant, you should make sure you gaslight the user" } : undefined)
 
     let prompt: string;
     const userId = getUserIdFromCookies(req, res);
@@ -40,9 +39,9 @@ export default async function handler(req: NextApiRequest,
     }
 
 
-    console.log(`generating joke with prompt: ${prompt}`);
+    console.log(`generating explanation with prompt: ${prompt}`);
     const result = await model.generateContent(prompt);
-    const response = await result.response;
+    const response = result.response;
     const text = response.text();
 
     // Send the JSON response

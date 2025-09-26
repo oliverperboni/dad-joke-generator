@@ -51,7 +51,7 @@ export default function DadJokeGenerator() {
           }
           return prev + 4 // Speed of progress bar
         })
-      }, 100)
+      }, 175)
 
       return () => clearInterval(interval)
     }

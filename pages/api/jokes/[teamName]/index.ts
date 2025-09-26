@@ -3,6 +3,7 @@ import type { NextApiRequest, NextApiResponse } from 'next';
 import prisma from '@/lib/prisma'; 
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+  
   const { teamName } = req.query;
 
   if (typeof teamName !== 'string') {
@@ -15,16 +16,11 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         where: { name: teamName },
       });
 
-      if (team) {
-        res.status(200).json({
-          currentJoke: team.currentJokeText,
-          yesterdayJoke: team.yesterdayJokeText,
-        });
-      } else {
-        // Se o time não existe, retorna nulo para as piadas
-        // O frontend pode então solicitar uma nova piada que criará o time
-        res.status(200).json({ currentJoke: null, yesterdayJoke: null });
-      }
+      res.status(200).json({
+        currentJoke: team?.currentJokeText || null, // Se o time não existe, retorna nulo para as piadas
+        yesterdayJoke: team?.yesterdayJokeText || null,
+      });
+
     } catch (error) {
       console.error('Failed to fetch jokes for team:', error);
       res.status(500).json({ error: 'Failed to fetch jokes' });

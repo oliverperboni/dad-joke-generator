@@ -122,7 +122,7 @@ export default function DadJokeGenerator() {
           }
           return prev + 4;
         });
-      }, 100);
+      }, 175);
       return () => clearInterval(interval);
     }
   }, [isLoading]);

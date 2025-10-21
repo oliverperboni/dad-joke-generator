@@ -35,7 +35,7 @@ export default async function handler(req: NextApiRequest,
       prompt = `Keep it as short as possible and in a max 150 characters, assume the joke is funny and makes sense and explain it like the user should understand, DO NOT SAY IT DOESN'T MAKE SENSE. Use a condescending and serious tone: "${joke}"`;
     } else {
       console.log("Not trolling explanation for:", userId);
-      prompt = `Explain this dad joke briefly and objectively: "${joke}"`;
+      prompt = `Explain this dad joke briefly and objectively : "${joke}", please don't any markdown formatting and keep it under 300 characters.`;
     }
 
 
